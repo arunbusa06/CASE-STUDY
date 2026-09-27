@@ -1,0 +1,4 @@
+const jwt=require('jsonwebtoken'),User=require('../models/User'),HttpError=require('../utils/httpError'),asyncHandler=require('../utils/asyncHandler');
+const protect=asyncHandler(async(req,res,next)=>{const h=req.headers.authorization||'';if(!h.startsWith('Bearer '))throw new HttpError(401,'Unauthorized request',{requiredHeader:'Authorization: Bearer <token>'});let p;try{p=jwt.verify(h.slice(7),process.env.JWT_SECRET);}catch(e){throw new HttpError(401,'Invalid or expired token');}const u=await User.findById(p.sub);if(!u)throw new HttpError(401,'User account no longer exists');req.user=u;next();});
+const authorize=(...roles)=>(req,res,next)=>req.user&&roles.includes(req.user.role)?next():next(new HttpError(403,'Access forbidden',{details:'Insufficient permissions for this resource.'}));
+module.exports={protect,authorize};

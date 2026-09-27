@@ -1,0 +1,1 @@
+const User=require('../models/User');exports.list=async(req,res)=>{const data=await User.find().select('name email role createdAt').sort({createdAt:-1});res.json({success:true,count:data.length,data});};

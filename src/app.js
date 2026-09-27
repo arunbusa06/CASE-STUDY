@@ -1,0 +1,12 @@
+const express=require('express'), cors=require('cors'), helmet=require('helmet'), morgan=require('morgan'), rateLimit=require('express-rate-limit');
+const {notFound,errorHandler}=require('./middleware/error.middleware');
+const app=express();
+app.use(helmet()); app.use(cors({origin:process.env.CLIENT_ORIGIN||'*'})); app.use(express.json({limit:'1mb'})); app.use(morgan('dev'));
+app.use('/api',rateLimit({windowMs:15*60*1000,limit:300,standardHeaders:'draft-7',legacyHeaders:false}));
+app.get('/api/health',(_req,res)=>res.json({success:true,message:'API is healthy',service:'Food Delivery API',timestamp:new Date().toISOString()}));
+app.use('/api/auth',require('./routes/auth.routes'));
+app.use('/api/restaurants',require('./routes/restaurant.routes'));
+app.use('/api/food-items',require('./routes/food.routes'));
+app.use('/api/orders',require('./routes/order.routes'));
+app.use('/api/users',require('./routes/user.routes'));
+app.use(notFound); app.use(errorHandler); module.exports=app;
